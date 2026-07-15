@@ -564,10 +564,9 @@ const state = {
 };
 let etasTimer = null;
 let weatherTimer = null;
-
 function $(id){ return document.getElementById(id); }
 function escapeHtml(value){
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
+  return String(value ?? "").replace(/[&<>\"']/g, char => ({
     "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
   }[char]));
 }
@@ -1152,7 +1151,6 @@ async function refreshWeather(){
     ]);
     const findKwunTong = rows =>
       rows.find(row => String(row.place || "").includes("觀塘") || String(row.place || "").includes("Kwun Tong")) || rows[0];
-
     const temperatureRow = findKwunTong(weatherJson.temperature?.data || []);
     const humidityRow = findKwunTong(weatherJson.humidity?.data || []);
     const rainfallRow = findKwunTong(weatherJson.rainfall?.data || []);
