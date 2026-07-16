@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="zh-HK">
 <head>
@@ -349,16 +348,16 @@
     </div>
   </details>
 
-  <!-- ONE-TIME UPDATE POPUP FOR David (CANTONESE VERSION) -->
-  <div id="David-update-modal" class="modal-overlay hidden">
+  <!-- ONE-TIME UPDATE POPUP FOR Isis (CANTONESE VERSION) -->
+  <div id="Isis-update-modal" class="modal-overlay hidden">
     <div class="modal-content" style="text-align: center; max-width: 400px;">
       <h2 style="margin-bottom: 12px; font-size: 18px; color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 6px;">
         ⚠️ 系統更新提示
       </h2>
       <p style="font-size: 15px; font-weight: 900; line-height: 1.6; margin-bottom: 20px; color: var(--fg);">
-        HI ISIS , 唔好意思啊！我哋啱啱推播咗新嘅更新版本，之前儲存落嘅路線資料可能會唔見咗。
+        HI Isis, 唔好意思啊！我哋啱啱推播咗新嘅更新版本，之前儲存落嘅路線資料可能會唔見咗。Stamp in 16 July 2300LT
       </p>
-      <button id="David-modal-close-btn" class="btn active" style="width: 100%; padding: 10px; font-size: 14px;">我知道了 (OK)</button>
+      <button id="Isis-modal-close-btn" class="btn active" style="width: 100%; padding: 10px; font-size: 14px;">我知道了 (OK)</button>
     </div>
   </div>
 
@@ -372,8 +371,8 @@
       
       <div style="display: flex; flex-direction: column; gap: 14px; max-height: 50vh; overflow-y: auto; padding-right: 6px;">
         <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
-          <div class="tutorial-title" style="color: #059669;">☔ 1. 官方網格降雨預報 (精準定位觀塘)</div>
-          <div class="tutorial-text">全新對接天文台官方「香港網格點降雨臨近預報」CSV。系統自動篩選出最接近觀塘（22.313, 114.224）的預報點，實時分析未來兩小時的降雨趨勢，絕不盲目報雨！</div>
+          <div class="tutorial-title" style="color: #059669;">☔ 1. 官方網格降雨預報 (精準定位觀塘市中心)</div>
+          <div class="tutorial-text">全新對接天文台官方「香港網格點降雨臨近預報」CSV。系統自動篩選出最接近觀塘市中心智慧燈柱城市氣象監測站（22.32, 114.21）的預報點，實時分析未來兩小時的降雨趨勢，絕不盲目報雨！</div>
         </div>
 
         <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
@@ -402,7 +401,7 @@
       <h2 style="margin-bottom: 16px; font-size: 18px;">🎉 下班智能視覺提示與地圖鏡頭功能</h2>
       <div class="tutorial-section">
         <div class="tutorial-title">☔ 官方網格降雨臨近預報</div>
-        <div class="tutorial-text">直接讀取天文台網格降雨預測，精準定位觀塘，為您帶來最誠實、最精準的降雨概率！</div>
+        <div class="tutorial-text">直接讀取天文台網格降雨預測，精準定位觀塘市中心智慧燈柱 (22.32, 114.21)，為您帶來最誠實、最精準的降雨概率！</div>
       </div>
       <div class="tutorial-section">
         <div class="tutorial-title">🚌 實時全線車站與巴士定位</div>
@@ -465,7 +464,7 @@
     
     <!-- Mini Rain Strip -->
     <div id="mini-rain-strip" style="display:flex; justify-content: space-between; background: var(--soft); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); margin-bottom: 12px; font-size: 13px;">
-      <div style="font-weight: 800; display: flex; align-items: center; gap: 4px;">☔ 觀塘降雨預測 <span style="font-size: 10px; background: var(--accent); color: white; padding: 1px 4px; border-radius: 4px; font-weight: 900;">官方網格源</span></div>
+      <div style="font-weight: 800; display: flex; align-items: center; gap: 4px;">☔ 觀塘市中心降雨預測 <span style="font-size: 10px; background: var(--accent); color: white; padding: 1px 4px; border-radius: 4px; font-weight: 900;">智慧燈柱 22.32, 114.21</span></div>
       <div style="display:flex; gap: 12px; font-weight: 900;">
          <div>30分: <span id="mini-rain-5">--</span></div>
          <div>60分: <span id="mini-rain-10">--</span></div>
@@ -529,7 +528,7 @@
   <div id="tab-weather" class="tab-content hidden">
     <section class="panel">
       <div class="status-row" style="margin-bottom:12px;">
-        <h2>觀塘天氣詳情</h2>
+        <h2>觀塘市中心天氣詳情</h2>
         <div style="display:flex;gap:12px;align-items:center"><div id="status-chip" class="note" style="color:var(--accent);">初始化</div></div>
       </div>
       <details class="custom-accordion" id="weather-details-accordion" open>
@@ -542,7 +541,7 @@
 
           <div id="warning-box" class="warning-box hidden"><div class="note" style="font-weight: 800; margin-bottom: 4px;">天氣警告</div><div id="warning-list" class="warning-list"></div></div>
           <div class="cards" style="grid-template-columns:1.4fr 1fr 1fr 1fr; margin-bottom: 12px;">
-            <div class="card"><div class="result-name">目前天氣</div><div id="kwt-current-weather" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="kwt-current-detail" class="result-detail">--</div></div>
+            <div class="card"><div class="result-name">目前天氣 (智慧燈柱測站)</div><div id="kwt-current-weather" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="kwt-current-detail" class="result-detail">--</div></div>
             <div class="card"><div class="result-name">30 分鐘後 (官方預報)</div><div id="rain-5-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-5-detail" class="result-detail">--</div></div>
             <div class="card"><div class="result-name">60 分鐘後 (官方預報)</div><div id="rain-10-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-10-detail" class="result-detail">--</div></div>
             <div class="card"><div class="result-name">90 分鐘後 (官方預報)</div><div id="rain-15-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-15-detail" class="result-detail">--</div></div>
@@ -1109,7 +1108,8 @@ async function searchGmb(route, region, targetDirection){
 function initMap() {
   if (lfMap) return;
   try {
-    lfMap = L.map('stop-map', { center: [22.3125, 114.2253], zoom: 14, zoomControl: true });
+    // 預設地圖中心點調整至觀塘市中心 (22.32, 114.21)
+    lfMap = L.map('stop-map', { center: [22.32, 114.21], zoom: 15, zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(lfMap);
     lfMarkersGroup = L.featureGroup().addTo(lfMap);
 
@@ -2061,7 +2061,7 @@ function showRainRisk(minutes, score){
   if (mini) { mini.textContent = `${score}%`; mini.style.color = info.color; }
 }
 
-// 根據天文台官方網格點 CSV 數據，解析最接近觀塘的降雨臨近預報
+// 根據天文台官方網格點 CSV 數據，解析最接近觀塘市中心智慧燈柱 (22.32, 114.21) 的降雨預報
 async function getKwunTongGridNowcast() {
   const csvUrl = "https://data.weather.gov.hk/weatherAPI/hko_data/F3/Gridded_rainfall_nowcast_tc.csv";
   try {
@@ -2069,7 +2069,8 @@ async function getKwunTongGridNowcast() {
     const lines = csvText.split(/\r?\n/).map(line => line.split(','));
     if (lines.length < 2) return null;
 
-    const headers = lines[0].map(h => h.trim());
+    // 清除可能存在的引號並去除空白
+    const headers = lines[0].map(h => h.replace(/["']/g, "").trim());
     
     // 動態識別經緯度及預報時間列
     const latIdx = headers.findIndex(h => /lat|緯|纬/i.test(h));
@@ -2083,23 +2084,23 @@ async function getKwunTongGridNowcast() {
 
     if (latIdx === -1 || lngIdx === -1) return null;
 
-    // 觀塘核心坐標
-    const KT_LAT = 22.313;
-    const KT_LNG = 114.224;
+    // 觀塘市中心 多功能智慧燈柱 / 城市氣象監測站 核心坐標 
+    const KT_LAT = 22.32;
+    const KT_LNG = 114.21;
 
     let closestRow = null;
     let minDistance = Infinity;
 
-    // 遍歷所有網格點，尋找距離觀塘最近的點
+    // 遍歷所有網格點，尋找距離目標測站最近的點
     for (let i = 1; i < lines.length; i++) {
       const row = lines[i];
       if (row.length < headers.length) continue;
 
-      const lat = parseFloat(row[latIdx]);
-      const lng = parseFloat(row[lngIdx]);
+      const lat = parseFloat(row[latIdx]?.replace(/["']/g, ""));
+      const lng = parseFloat(row[lngIdx]?.replace(/["']/g, ""));
       if (isNaN(lat) || isNaN(lng)) continue;
 
-      // 簡單歐氏距離
+      // 歐氏距離計算
       const dist = Math.sqrt(Math.pow(lat - KT_LAT, 2) + Math.pow(lng - KT_LNG, 2));
       if (dist < minDistance) {
         minDistance = dist;
@@ -2109,12 +2110,12 @@ async function getKwunTongGridNowcast() {
 
     if (closestRow) {
       const nowcast = {
-        lat: parseFloat(closestRow[latIdx]),
-        lng: parseFloat(closestRow[lngIdx]),
-        p05: p05Idx !== -1 ? parseFloat(closestRow[p05Idx]) || 0 : 0,
-        p10: p10Idx !== -1 ? parseFloat(closestRow[p10Idx]) || 0 : 0,
-        p15: p15Idx !== -1 ? parseFloat(closestRow[p15Idx]) || 0 : 0,
-        p20: p20Idx !== -1 ? parseFloat(closestRow[p20Idx]) || 0 : 0,
+        lat: parseFloat(closestRow[latIdx]?.replace(/["']/g, "")),
+        lng: parseFloat(closestRow[lngIdx]?.replace(/["']/g, "")),
+        p05: p05Idx !== -1 ? parseFloat(closestRow[p05Idx]?.replace(/["']/g, "")) || 0 : 0,
+        p10: p10Idx !== -1 ? parseFloat(closestRow[p10Idx]?.replace(/["']/g, "")) || 0 : 0,
+        p15: p15Idx !== -1 ? parseFloat(closestRow[p15Idx]?.replace(/["']/g, "")) || 0 : 0,
+        p20: p20Idx !== -1 ? parseFloat(closestRow[p20Idx]?.replace(/["']/g, "")) || 0 : 0,
       };
       return nowcast;
     }
@@ -2140,7 +2141,7 @@ function buildBeforeGoRemark(temp, risk, warnings, ktNowcast){
   const text = warnings.join(" "); const tips = [];
   
   if (ktNowcast) {
-    tips.push(`📊 天文台網格預報 (觀塘)：未來 30 分鐘預測雨量為 ${ktNowcast.p05.toFixed(1)} mm，60 分鐘預測雨量為 ${ktNowcast.p10.toFixed(1)} mm。`);
+    tips.push(`📊 天文台網格預報 (觀塘市中心智慧燈柱)：未來 30 分鐘預測雨量為 ${ktNowcast.p05.toFixed(1)} mm，60 分鐘預測雨量為 ${ktNowcast.p10.toFixed(1)} mm。`);
   }
 
   if (/雷暴|暴雨/.test(text) || risk.min5 >= 70) {
@@ -2299,7 +2300,7 @@ async function refreshWeather(){
     }
     $("weather-updated").textContent = `天文台資料更新時間：${hkoTimeStr}`;
 
-    $("weather-accordion-summary-text").innerHTML = `觀塘：${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
+    $("weather-accordion-summary-text").innerHTML = `觀塘市中心智慧燈柱：${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
     $("kwt-current-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
     
     if (ktNowcast) {
@@ -2353,7 +2354,7 @@ async function refreshWeather(){
     $("sum-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"} | ${desc}`;
   } catch (error) {
     console.error("Weather refresh failed", error);
-    $("weather-accordion-summary-text").textContent = "觀塘：24°C・多雲";
+    $("weather-accordion-summary-text").textContent = "觀塘市中心：24°C・多雲";
     $("status-chip").textContent = "狀態：天氣更新失敗";
     
     showRainRisk(5, 10);
@@ -2394,12 +2395,13 @@ function updateSummary(){
 function init(){
   loadState(); autoSwitchTime(); renderPlace(); initMap();
 
-  if (!localStorage.getItem("isis_update_acknowledged_2026_07")) {
-    $("isis-update-modal").classList.remove("hidden");
+  // 專屬 Isis 系統更新提示彈窗
+  if (!localStorage.getItem("Isis_update_acknowledged_2026_07")) {
+    $("Isis-update-modal").classList.remove("hidden");
   }
-  $("isis-modal-close-btn").onclick = () => {
-    $("isis-update-modal").classList.add("hidden");
-    localStorage.setItem("isis_update_acknowledged_2026_07", "true");
+  $("Isis-modal-close-btn").onclick = () => {
+    $("Isis-update-modal").classList.add("hidden");
+    localStorage.setItem("Isis_update_acknowledged_2026_07", "true");
   };
 
   $("version-badge-trigger").onclick = openChangelog;
