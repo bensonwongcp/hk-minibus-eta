@@ -199,9 +199,9 @@
       <!-- 下班倒計時提醒 -->
       <div id="departure-countdown" class="note" style="font-weight: 800; color: var(--accent); margin-top: 2px; font-size: 13px;"></div>
 
-      <!-- 實時詳細警告敘述與出門提醒 -->
-      <div id="hko-front-warning-text" class="note" style="color: var(--danger); font-weight: 800; line-height: 1.5; font-size: 13px; margin-top: 4px;">
-        💡 正在載入天文台警告資訊...
+      <!-- 實時詳細警告敘述、特別天氣提示與出門提醒 -->
+      <div id="hko-front-warning-text" class="note" style="color: var(--danger); font-weight: 800; line-height: 1.5; font-size: 13px; margin-top: 4px; border-left: 3px solid var(--danger); padding-left: 8px; background: var(--warnbg); border-radius: 4px; padding: 6px 10px;">
+        💡 正在載入天文台警告與特別天氣提示...
       </div>
       
       <!-- 智能下班提醒 -->
@@ -1413,37 +1413,15 @@ function buildBeforeGoRemark(temp, risk, warnings){
   return tips.join(" ");
 }
 
-const warningIconMap = {
-  "WTS": "https://www.hko.gov.hk/textonly/img/warn/ts.gif",
-  "WRAINA": "https://www.hko.gov.hk/textonly/img/warn/raina.gif",
-  "WRAINR": "https://www.hko.gov.hk/textonly/img/warn/rainr.gif",
-  "WRAINB": "https://www.hko.gov.hk/textonly/img/warn/rainb.gif",
-  "TC1": "https://www.hko.gov.hk/textonly/img/warn/tc1.gif",
-  "TC3": "https://www.hko.gov.hk/textonly/img/warn/tc3.gif",
-  "TC8NE": "https://www.hko.gov.hk/textonly/img/warn/tc8ne.gif",
-  "TC8SE": "https://www.hko.gov.hk/textonly/img/warn/tc8se.gif",
-  "TC8NW": "https://www.hko.gov.hk/textonly/img/warn/tc8nw.gif",
-  "TC8SW": "https://www.hko.gov.hk/textonly/img/warn/tc8sw.gif",
-  "TC9": "https://www.hko.gov.hk/textonly/img/warn/tc9.gif",
-  "TC10": "https://www.hko.gov.hk/textonly/img/warn/tc10.gif",
-  "WHOT": "https://www.hko.gov.hk/textonly/img/warn/vhot.gif",
-  "WCOLD": "https://www.hko.gov.hk/textonly/img/warn/cold.gif",
-  "WMSGNL": "https://www.hko.gov.hk/textonly/img/warn/mon.gif",
-  "WFIREY": "https://www.hko.gov.hk/textonly/img/warn/firey.gif",
-  "WFIRER": "https://www.hko.gov.hk/textonly/img/warn/firer.gif",
-  "WFROST": "https://www.hko.gov.hk/textonly/img/warn/frost.gif",
-  "WFNTSA": "https://www.hko.gov.hk/textonly/img/warn/ntflooding.gif",
-  "WL": "https://www.hko.gov.hk/textonly/img/warn/landslip.gif",
-  "WTMW": "https://www.hko.gov.hk/textonly/img/warn/tsunami.gif"
-};
-
 async function refreshWeather(){
   try {
-    const [weatherJson, warningJson, fndJson, warningInfoJson] = await Promise.all([
+    // 獲取當前天氣、警告一覽、9天天氣預報、詳細天氣警告資訊(warningInfo)、以及特別天氣提示(swt)
+    const [weatherJson, warningJson, fndJson, warningInfoJson, swtJson] = await Promise.all([
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc"),
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc").catch(() => ({})),
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc").catch(() => null),
-      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/warningInfo&lang=tc").catch(() => ({}))
+      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=tc").catch(() => ({})),
+      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=swt&lang=tc").catch(() => ({}))
     ]);
     
     const findKwunTong = rows => rows.find(row => String(row.place || "").includes("觀塘") || String(row.place || "").includes("Kwun Tong")) || rows[0];
@@ -1451,32 +1429,68 @@ async function refreshWeather(){
     const rainfall = Number(findKwunTong(weatherJson.rainfall?.data || [])?.max ?? 0);
     const icon = Number(weatherJson.icon?.[0] || 50);
     
-    const warnings = Object.values(warningJson || {}).filter(item => item && item.name && item.actionCode !== "CANCEL").map(item => item.name);
+    // 1. 處理警告圖標 (直接從 warnsum API 回傳的 mappedicon 提取官方圖標)
+    const iconsContainer = $("hko-warning-icons");
+    iconsContainer.innerHTML = "";
     
-    const activeWarningCodes = [];
+    const warnings = [];
     if (warningJson) {
       Object.keys(warningJson).forEach(key => {
         const item = warningJson[key];
-        if (item && item.actionCode !== "CANCEL") { activeWarningCodes.push(item.code || key); }
+        if (item && item.actionCode !== "CANCEL") { 
+          warnings.push(item.name);
+          // 如果天文台 API 直接提供了 mappedicon，我們就直接載入它
+          if (item.mappedicon) {
+            const img = document.createElement("img");
+            // 轉換可能存在的反斜槓
+            img.src = item.mappedicon.replace(/\\/g, ""); 
+            img.alt = item.name; 
+            img.style.height = "26px"; 
+            img.style.width = "auto"; 
+            img.style.borderRadius = "4px";
+            img.style.boxShadow = "0 1px 3px rgba(0,0,0,0.15)";
+            iconsContainer.appendChild(img);
+          }
+        }
       });
     }
     
+    // 2. 處理「特別天氣提示 (SWT)」與「詳細天氣警告資訊」
+    let warningAndSwtHtml = "";
+    
+    // 先加入特別天氣提示 (SWT)
+    if (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0) {
+      warningAndSwtHtml += `<div style="color: #c2410c; font-weight: 900; margin-bottom: 6px;">📢 特別天氣提示：</div>`;
+      swtJson.swt.forEach(tip => {
+        warningAndSwtHtml += `<div style="margin-bottom: 8px; line-height: 1.5; color: var(--fg); font-size: 13px;">📌 ${escapeHtml(tip.desc)}</div>`;
+      });
+    }
+    
+    // 再加入詳細天氣警告資訊 (warningInfo)
+    if (warningInfoJson && Array.isArray(warningInfoJson.details) && warningInfoJson.details.length > 0) {
+      warningAndSwtHtml += `<div style="color: var(--danger); font-weight: 900; margin-top: 8px; margin-bottom: 6px;">⚠️ 生效天氣警告詳情：</div>`;
+      warningInfoJson.details.forEach(detail => {
+        if (Array.isArray(detail.contents)) {
+          detail.contents.forEach(txt => {
+            if (txt) {
+              warningAndSwtHtml += `<div style="margin-bottom: 6px; line-height: 1.5; font-size: 12px; color: var(--muted);">${escapeHtml(txt)}</div>`;
+            }
+          });
+        }
+      });
+    }
+    
+    // 如果兩者都沒有，顯示正常提示
+    if (!warningAndSwtHtml) {
+      warningAndSwtHtml = "🟢 目前沒有生效的天氣警告或特別天氣提示。出門安全，祝您路路暢通！";
+    }
+    
+    $("hko-front-warning-text").innerHTML = warningAndSwtHtml;
+
+    // 3. 更新其他天氣詳情
     const desc = weatherText(icon);
     const risk = calculateRainRisk(rainfall, icon, warnings);
     const beforeGoText = buildBeforeGoRemark(temp, risk, warnings);
-
-    let detailedWarningText = "🟢 目前沒有生效的天氣警告。";
-    if (warningInfoJson && Array.isArray(warningInfoJson.details) && warningInfoJson.details.length > 0) {
-      const texts = [];
-      warningInfoJson.details.forEach(detail => {
-        if (Array.isArray(detail.contents)) {
-          detail.contents.forEach(txt => { if (txt) texts.push(txt); });
-        }
-      });
-      if (texts.length > 0) { detailedWarningText = "💡 " + texts.join("<br>"); }
-    } else if (warnings.length > 0) {
-      detailedWarningText = `⚠️ 生效警告：${warnings.join("、")}`;
-    }
 
     let hkoTimeStr = new Date().toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Hong_Kong" });
     if (weatherJson.updateTime) {
@@ -1484,18 +1498,6 @@ async function refreshWeather(){
       hkoTimeStr = hkoDate.toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Hong_Kong" });
     }
     $("weather-updated").textContent = `天文台資料更新時間：${hkoTimeStr}`;
-    $("hko-front-warning-text").innerHTML = detailedWarningText;
-
-    const iconsContainer = $("hko-warning-icons");
-    iconsContainer.innerHTML = "";
-    activeWarningCodes.forEach(code => {
-      const imgUrl = warningIconMap[code];
-      if (imgUrl) {
-        const img = document.createElement("img");
-        img.src = imgUrl; img.alt = code; img.style.height = "26px"; img.style.width = "auto"; img.style.borderRadius = "4px";
-        iconsContainer.appendChild(img);
-      }
-    });
 
     $("weather-accordion-summary-text").innerHTML = `觀塘：${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
     $("kwt-current-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
@@ -1504,9 +1506,15 @@ async function refreshWeather(){
     $("before-go-remark").textContent = beforeGoText;
 
     const smartBanner = $("smart-weather-banner");
-    if (warnings.length > 0 || risk.min5 >= 50) {
+    if (warnings.length > 0 || risk.min5 >= 50 || (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0)) {
       smartBanner.classList.remove("hidden");
-      $("smart-weather-text").textContent = `⚠️ ${warnings.length > 0 ? warnings[0] : "降雨風險較高"}，請留意天氣變化。`;
+      let bannerMsg = "⚠️ 降雨風險較高，請留意天氣變化。";
+      if (warnings.length > 0) {
+        bannerMsg = `⚠️ 生效警告：${warnings.join("、")}`;
+      } else if (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0) {
+        bannerMsg = `📢 特別提示：${swtJson.swt[0].desc.substring(0, 25)}...`;
+      }
+      $("smart-weather-text").textContent = bannerMsg;
       smartBanner.onclick = () => switchTab('weather');
     } else { smartBanner.classList.add("hidden"); }
 
@@ -1535,6 +1543,7 @@ async function refreshWeather(){
     $("status-chip").textContent = "狀態：正常";
     $("sum-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"} | ${desc}`;
   } catch (error) {
+    console.error("Weather refresh failed", error);
     $("weather-accordion-summary-text").textContent = "觀塘：24°C・多雲";
     $("status-chip").textContent = "狀態：天氣更新失敗";
   }
