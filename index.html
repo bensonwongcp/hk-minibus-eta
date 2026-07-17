@@ -167,8 +167,6 @@
     /* Fare Badge */
     .fare-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
     body.dark .fare-badge { background: rgba(52, 211, 153, 0.1); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
-    .fare-testing-tag { font-size: 9px; background: #e2e8f0; color: #475569; padding: 1px 4px; border-radius: 4px; font-weight: 900; margin-left: 2px; border: 1px solid #cbd5e1; }
-    body.dark .fare-testing-tag { background: #334155; color: #cbd5e1; border-color: #475569; }
 
     /* Version Badge Style */
     .version-badge { display: inline-block; background: var(--soft); color: var(--accent); border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 900; cursor: pointer; transition: all 0.2s; }
@@ -221,57 +219,6 @@
     .wheelchair-badge { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 900; padding: 1px 4px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
     body.dark .wheelchair-badge { background: rgba(96, 165, 250, 0.15); color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); }
 
-    /* Weather Warning Banner Styles */
-    #hko-front-warning-text {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--danger);
-      font-weight: 800;
-      line-height: 1.5;
-      font-size: 13px;
-      margin-top: 4px;
-      border-left: 4px solid var(--danger);
-      background: var(--warnbg);
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    #hko-front-warning-text img {
-      height: 28px;
-      width: auto;
-      object-fit: contain;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-
-    /* 📢 Special Weather Tips Badge Animation */
-    @keyframes pulse-orange {
-      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1); }
-      70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); transform: scale(1.08); }
-      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
-    }
-    .swt-badge-trigger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff7ed;
-      border: 1px solid #f97316;
-      border-radius: 8px;
-      padding: 4px 8px;
-      cursor: pointer;
-      animation: pulse-orange 2s infinite;
-      transition: all 0.2s;
-    }
-    body.dark .swt-badge-trigger {
-      background: #2d1910;
-      border-color: #ea580c;
-    }
-    .swt-badge-trigger:hover {
-      transform: scale(1.15) !important;
-    }
-
     @media (max-width: 760px) { body { padding: 8px; } .form-grid { grid-template-columns: 1fr 1fr; } .form-grid .search-button { grid-column: span 2; } .cards { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -285,15 +232,8 @@
         <h1 style="margin: 0;">香港巴士／小巴 ETA＋觀塘天氣與地圖鏡頭</h1>
         <!-- 版本號徽章 -->
         <span id="version-badge-trigger" class="version-badge" title="點擊查看更新日誌">v2026.7.16BETA</span>
-        <!-- 官方警告信號圖標直接在標題旁並排顯示 -->
+        <!-- 官方警告信號 GIF 圖標直接在標題旁並排顯示 -->
         <div id="hko-warning-icons" style="display: flex; gap: 6px; align-items: center;"></div>
-        <!-- 📢 特別天氣提示動態圖標 (預設隱藏，有提示時動態顯示) -->
-        <div id="hko-swt-trigger-wrapper" class="hidden">
-          <div class="swt-badge-trigger" onclick="switchTabAndScrollToSwt()" title="📢 點擊查看最新特別天氣提示詳情！">
-            <span style="font-size: 14px; margin-right: 4px;">📢</span>
-            <span style="font-size: 11px; font-weight: 900; color: #ea580c;">特別提示</span>
-          </div>
-        </div>
       </div>
       
       <!-- 天文台更新時間 -->
@@ -302,13 +242,13 @@
       <!-- 下班倒計時提醒 -->
       <div id="departure-countdown" class="note" style="font-weight: 800; color: var(--accent); margin-top: 2px; font-size: 13px;"></div>
 
-      <!-- 實時精簡警告與出門提醒 (點擊直接切換至天氣分頁) -->
-      <div id="hko-front-warning-text" onclick="switchTab('weather')" title="點擊查看完整天氣詳情">
-        <span>💡 正在載入天文台警告與特別天氣提示...</span>
+      <!-- 實實精簡警告與出門提醒 (點擊直接切換至天氣分頁) -->
+      <div id="hko-front-warning-text" class="note" style="color: var(--danger); font-weight: 800; line-height: 1.5; font-size: 13px; margin-top: 4px; border-left: 3px solid var(--danger); padding-left: 8px; background: var(--warnbg); border-radius: 4px; padding: 6px 10px; cursor: pointer; transition: opacity 0.2s;" onclick="switchTab('weather')" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1" title="點擊查看完整天氣詳情">
+        💡 正在載入天文台警告與特別天氣提示...
       </div>
       
       <!-- 智能下班提醒 -->
-      <div class="note" style="margin-top: 2px;">智能下班提醒 + 實時車費分段計算與地圖整合版 <span class="fare-testing-tag">🧪 車費測試中</span></div>
+      <div class="note" style="margin-top: 2px;">智能下班提醒 + 實時車費分段計算與地圖整合版</div>
     </div>
     
     <div class="toolbar" style="margin-top: 8px;">
@@ -348,16 +288,16 @@
     </div>
   </details>
 
-  <!-- ONE-TIME UPDATE POPUP FOR Isis (CANTONESE VERSION) -->
-  <div id="Isis-update-modal" class="modal-overlay hidden">
+  <!-- ONE-TIME UPDATE POPUP FOR ISIS (CANTONESE VERSION) -->
+  <div id="isis-update-modal" class="modal-overlay hidden">
     <div class="modal-content" style="text-align: center; max-width: 400px;">
       <h2 style="margin-bottom: 12px; font-size: 18px; color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 6px;">
         ⚠️ 系統更新提示
       </h2>
       <p style="font-size: 15px; font-weight: 900; line-height: 1.6; margin-bottom: 20px; color: var(--fg);">
-        HI Isis, 唔好意思啊！我哋啱啱推播咗新嘅更新版本，之前儲存落嘅路線資料可能會唔見咗。Stamp in 16 July 2300LT
+        HI ISIS, 唔好意思啊！我哋啱啱推播咗新嘅更新版本，之前儲存落嘅路線資料可能會唔見咗。
       </p>
-      <button id="Isis-modal-close-btn" class="btn active" style="width: 100%; padding: 10px; font-size: 14px;">我知道了 (OK)</button>
+      <button id="isis-modal-close-btn" class="btn active" style="width: 100%; padding: 10px; font-size: 14px;">我知道了 (OK)</button>
     </div>
   </div>
 
@@ -371,23 +311,23 @@
       
       <div style="display: flex; flex-direction: column; gap: 14px; max-height: 50vh; overflow-y: auto; padding-right: 6px;">
         <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
-          <div class="tutorial-title" style="color: #059669;">☔ 1. 官方網格降雨預報 (精準定位觀塘市中心)</div>
-          <div class="tutorial-text">全新對接天文台官方「香港網格點降雨臨近預報」CSV。系統自動篩選出最接近觀塘市中心智慧燈柱城市氣象監測站（22.32, 114.21）的預報點，實時分析未來兩小時的降雨趨勢，絕不盲目報雨！</div>
-        </div>
-
-        <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
-          <div class="tutorial-title" style="color: #3b82f6;">🧪 2. 實時車費與分段收費 (測試中)</div>
-          <div class="tutorial-text">內置熱門路線（如 619、1A、601 等）的精準分段數據庫，動態識別過海巴士過海後的票價。目前此功能處於測試階段，已標註「測試中」標籤。</div>
-        </div>
-
-        <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
-          <div class="tutorial-title" style="color: #059669;">🚌 3. 實時路線全線車站與巴士定位</div>
+          <div class="tutorial-title" style="color: #059669;">🚌 1. 實時路線全線車站與巴士定位</div>
           <div class="tutorial-text">點擊任何已存卡片，地圖下方將會展開「實時全線車站時間線」。您可以清楚看見整條線路的所有站點，且系統會智能模擬並顯示巴士圖標（🚌）當前最接近的站點位置！</div>
         </div>
 
         <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
-          <div class="tutorial-title" style="color: #d97706;">📹 4. 觀塘實時路況鏡頭</div>
+          <div class="tutorial-title" style="color: #3b82f6;">🏆 2. 智能目的地排行榜 (Multi-Route Leaderboard)</div>
+          <div class="tutorial-text">當您有多條路線前往相同目的地（如中環或旺角），可以開啟「目的地排行榜」功能。系統會自動進行跨路線 ETA 排序，讓您一目了然哪班車最快到達！</div>
+        </div>
+
+        <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
+          <div class="tutorial-title" style="color: #059669;">📹 3. 觀塘實時路況鏡頭 (多重代理防封鎖機制)</div>
           <div class="tutorial-text">全新加入運輸署觀塘核心路段實時鏡頭！直接在地圖上以 📹 圖標呈現。網頁版已內置自動切換代理技術，100% 繞過瀏覽器 CORS 安全阻擋。</div>
+        </div>
+
+        <div class="tutorial-section" style="border-bottom: 1px dashed var(--line); padding-bottom: 10px;">
+          <div class="tutorial-title" style="color: #d97706;">💰 4. 實時車費與分段收費</div>
+          <div class="tutorial-text">全面修正巴士及小巴車費邏輯！內置熱門路線（如 619、1A、601 等）的精準分段數據庫，動態識別過海巴士過海後的票價，幫您精明省錢。</div>
         </div>
       </div>
 
@@ -400,12 +340,12 @@
     <div class="modal-content">
       <h2 style="margin-bottom: 16px; font-size: 18px;">🎉 下班智能視覺提示與地圖鏡頭功能</h2>
       <div class="tutorial-section">
-        <div class="tutorial-title">☔ 官方網格降雨臨近預報</div>
-        <div class="tutorial-text">直接讀取天文台網格降雨預測，精準定位觀塘市中心智慧燈柱 (22.32, 114.21)，為您帶來最誠實、最精準的降雨概率！</div>
+        <div class="tutorial-title">🚌 實時路線全線車站與巴士定位</div>
+        <div class="tutorial-text">點擊任何巴士卡片，即可載入該線路所有站點，並查看巴士目前行駛到哪一個站！</div>
       </div>
       <div class="tutorial-section">
-        <div class="tutorial-title">🚌 實時全線車站與巴士定位</div>
-        <div class="tutorial-text">點擊任何巴士卡片，即可載入該線路所有站點，並查看巴士目前行駛到哪一個站！</div>
+        <div class="tutorial-title">🏆 智能目的地排行榜</div>
+        <div class="tutorial-text">自動將前往相同目的地的巴士進行 ETA 排序，助您做出最快、最明智的乘車選擇。</div>
       </div>
       <button id="tutorial-close-btn" class="btn active" style="width: 100%; margin-top: 10px;">我知道了</button>
     </div>
@@ -464,11 +404,11 @@
     
     <!-- Mini Rain Strip -->
     <div id="mini-rain-strip" style="display:flex; justify-content: space-between; background: var(--soft); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); margin-bottom: 12px; font-size: 13px;">
-      <div style="font-weight: 800; display: flex; align-items: center; gap: 4px;">☔ 觀塘市中心降雨預測 <span style="font-size: 10px; background: var(--accent); color: white; padding: 1px 4px; border-radius: 4px; font-weight: 900;">智慧燈柱 22.32, 114.21</span></div>
+      <div style="font-weight: 800;">☔ 降雨預測 (觀塘)</div>
       <div style="display:flex; gap: 12px; font-weight: 900;">
-         <div>30分: <span id="mini-rain-5">--</span></div>
-         <div>60分: <span id="mini-rain-10">--</span></div>
-         <div>90分: <span id="mini-rain-15">--</span></div>
+         <div>5分: <span id="mini-rain-5">--</span></div>
+         <div>10分: <span id="mini-rain-10">--</span></div>
+         <div>15分: <span id="mini-rain-15">--</span></div>
       </div>
     </div>
 
@@ -528,10 +468,10 @@
   <div id="tab-weather" class="tab-content hidden">
     <section class="panel">
       <div class="status-row" style="margin-bottom:12px;">
-        <h2>觀塘市中心天氣詳情</h2>
+        <h2>觀塘天氣詳情</h2>
         <div style="display:flex;gap:12px;align-items:center"><div id="status-chip" class="note" style="color:var(--accent);">初始化</div></div>
       </div>
-      <details class="custom-accordion" id="weather-details-accordion" open>
+      <details class="custom-accordion" open>
         <summary><span id="weather-accordion-summary-text">載入中...</span><span style="color:var(--muted); font-size: 12px;">詳情 ▾</span></summary>
         <div class="custom-accordion-content">
           <!-- 實時詳細天氣警告 & 特別天氣提示 -->
@@ -541,10 +481,10 @@
 
           <div id="warning-box" class="warning-box hidden"><div class="note" style="font-weight: 800; margin-bottom: 4px;">天氣警告</div><div id="warning-list" class="warning-list"></div></div>
           <div class="cards" style="grid-template-columns:1.4fr 1fr 1fr 1fr; margin-bottom: 12px;">
-            <div class="card"><div class="result-name">目前天氣 (智慧燈柱測站)</div><div id="kwt-current-weather" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="kwt-current-detail" class="result-detail">--</div></div>
-            <div class="card"><div class="result-name">30 分鐘後 (官方預報)</div><div id="rain-5-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-5-detail" class="result-detail">--</div></div>
-            <div class="card"><div class="result-name">60 分鐘後 (官方預報)</div><div id="rain-10-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-10-detail" class="result-detail">--</div></div>
-            <div class="card"><div class="result-name">90 分鐘後 (官方預報)</div><div id="rain-15-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-15-detail" class="result-detail">--</div></div>
+            <div class="card"><div class="result-name">目前天氣</div><div id="kwt-current-weather" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="kwt-current-detail" class="result-detail">--</div></div>
+            <div class="card"><div class="result-name">5 分鐘後</div><div id="rain-5-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-5-detail" class="result-detail">--</div></div>
+            <div class="card"><div class="result-name">10 分鐘後</div><div id="rain-10-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-10-detail" class="result-detail">--</div></div>
+            <div class="card"><div class="result-name">15 分鐘後</div><div id="rain-15-value" style="font-size:18px;font-weight:900;margin-top:8px;">--</div><div id="rain-15-detail" class="result-detail">--</div></div>
           </div>
           <div class="note" style="font-weight: 800; margin-bottom: 4px;">出門前提醒</div><div id="before-go-remark" class="note">--</div>
         </div>
@@ -559,7 +499,7 @@ const STORAGE_KEY = "hk_eta_dashboard_v11";
 const KMB_CACHE_KEY = "kmb_stops_cache_v2"; const GMB_STOP_CACHE_KEY = "gmb_stops_cache_v2";
 const KMB_CACHE_AGE = 7 * 24 * 60 * 60 * 1000; const GMB_CACHE_AGE = 3 * 24 * 60 * 60 * 1000;
 
-// 天文台官方警告代碼與圖擺 URL 對照表
+// 天文台官方警告信號 GIF 圖標對照表 (用於頂部標題旁與警告列表)
 const HKO_WARNING_ICONS = {
   "WTS": "https://www.hko.gov.hk/images_e/ts.gif",       // 雷暴警告
   "WRAING": "https://www.hko.gov.hk/images_e/raina.gif", // 黃色暴雨
@@ -573,7 +513,7 @@ const HKO_WARNING_ICONS = {
   "WTC8SW": "https://www.hko.gov.hk/images_e/tc8sw.gif", // 八號西南
   "WTC9": "https://www.hko.gov.hk/images_e/tc9.gif",     // 九號烈風
   "WTC10": "https://www.hko.gov.hk/images_e/tc10.gif",   // 十號颶風
-  "WHOT": "https://www.hko.gov.hk/images_e/vhot.gif",     // 酷熱天氣
+  "WHOT": "https://www.hko.gov.hk/images_e/vhot.gif",    // 酷熱天氣
   "WCOLD": "https://www.hko.gov.hk/images_e/cold.gif",   // 寒冷天氣
   "WMSGNL": "https://www.hko.gov.hk/images_e/sms.gif",   // 強烈季候風
   "WFIREY": "https://www.hko.gov.hk/images_e/firey.gif", // 黃色火災
@@ -798,8 +738,8 @@ function etaText(value){ const minutes = etaMinutes(value); if (!Number.isFinite
 function etaTime(value){ const date = parseHongKongDate(value); if (!date) return "--:--"; return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Hong_Kong" }); }
 function isLiveEta(value){ return parseHongKongDate(value)?.getTime() >= Date.now() - 60_000; }
 
-// 突破沙盒 CORS 限制的 Fetch 機制
-async function safeFetch(url, timeout = 15000){
+// 突破沙盒 CORS 限制的 Fetch 機制 (超時優化為 3 秒，防止卡死)
+async function safeFetch(url, timeout = 3000){
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeout);
   try { 
     const response = await fetch(url, { signal: controller.signal, cache: "no-store" }); 
@@ -810,23 +750,6 @@ async function safeFetch(url, timeout = 15000){
     try {
       const proxyResponse = await fetch(proxyUrl, { cache: "no-store" });
       if (proxyResponse.ok) { return await proxyResponse.json(); }
-    } catch (proxyError) {}
-    throw error;
-  } finally { clearTimeout(timer); }
-}
-
-// 專門用於獲取 CSV 格式的天文台網格降雨臨近預報
-async function fetchCsvText(url, timeout = 15000) {
-  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.text();
-  } catch (error) {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    try {
-      const proxyResponse = await fetch(proxyUrl, { cache: "no-store" });
-      if (proxyResponse.ok) { return await proxyResponse.text(); }
     } catch (proxyError) {}
     throw error;
   } finally { clearTimeout(timer); }
@@ -1035,42 +958,18 @@ async function searchGmbInRegion(route, regionCode, targetDirection = "outbound"
     const coordsMap = await batchFetchStopsGmbFast(stopIds);
     const totalStops = routeStops.length;
 
-    const isCircular = route === "22A";
-    const isKowloonBayVariant = isCircular && (variantDesc.includes("九龍灣") || variantDesc.includes("祥業街") || routeStops.some(s => {
-      const name = pickText(s.name_tc, s.stop_name_tc, "");
-      return name.includes("祥業街") || name.includes("兒童醫院");
-    }));
-
     routeStops.forEach((stop, idx) => {
       const stopId = String(stop.stop_id ?? stop.stopId);
       const stopSeq = Number(stop.stop_seq ?? stop.stopSeq);
       if (!stopId || !Number.isFinite(stopSeq)) return;
       const coords = coordsMap[stopId] || { lat: "", long: "" };
       const stopName = pickText(stop.name_tc, stop.name_en, stop.stop_name_tc, stop.stop_name_en, `車站 ${stopSeq}`);
-      
-      let finalDest = destination;
-      if (isCircular) {
-        if (isKowloonBayVariant) {
-          if (stopSeq <= 15) {
-            finalDest = "九龍灣 (祥業街)";
-          } else {
-            finalDest = "樂華邨 (經九龍灣)";
-          }
-        } else {
-          if (stopSeq <= 9) {
-            finalDest = "觀塘碼頭";
-          } else {
-            finalDest = "樂華邨";
-          }
-        }
-      }
-
-      const fareInfo = calculateFare("GMB", route, idx + 1, totalStops, stopName, finalDest);
+      const fareInfo = calculateFare("GMB", route, idx + 1, totalStops, stopName, destination);
 
       results.push({ 
         company: "GMB", route, region: regionCode, routeId: String(routeId), routeSeq, stopSeq, stopId: stopId, 
-        stopName, destination: finalDest, lat: coords.lat, long: coords.long, totalStops, fareInfo,
-        variantDesc: variantDesc
+        stopName, destination, lat: coords.lat, long: coords.long, totalStops, fareInfo,
+        variantDesc: variantDesc 
       }); 
     });
   }
@@ -1097,7 +996,8 @@ async function searchGmb(route, region, targetDirection){
     try { 
       const rows = await getGmbRouteStopsCached(route, regionCode, targetDirection); 
       if (rows.length) { 
-        all = all.concat(rows);
+        all = rows; 
+        break; 
       } 
     } catch {} 
   }
@@ -1108,8 +1008,7 @@ async function searchGmb(route, region, targetDirection){
 function initMap() {
   if (lfMap) return;
   try {
-    // 預設地圖中心點調整至觀塘市中心 (22.32, 114.21)
-    lfMap = L.map('stop-map', { center: [22.32, 114.21], zoom: 15, zoomControl: true });
+    lfMap = L.map('stop-map', { center: [22.3125, 114.2253], zoom: 14, zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(lfMap);
     lfMarkersGroup = L.featureGroup().addTo(lfMap);
 
@@ -1487,7 +1386,7 @@ function renderSearchResults(stopsToRender) {
 
     let fareBadgeHtml = "";
     if (item.fareInfo) {
-      fareBadgeHtml = `<span class="fare-badge" style="font-size: 10px; padding: 1px 4px;">$${item.fareInfo.fare}<span class="fare-testing-tag" style="font-size:7px; padding:0 2px;">🧪 測試中</span></span>`;
+      fareBadgeHtml = `<span class="fare-badge" style="font-size: 10px; padding: 1px 4px;">$${item.fareInfo.fare}</span>`;
     }
 
     const variantLabel = item.variantDesc ? `<div style="font-size: 11px; color: var(--accent); font-weight: 800; margin-top: 2px;">📋 路線變量: ${escapeHtml(item.variantDesc)}</div>` : "";
@@ -1541,7 +1440,7 @@ async function previewStopEta(index) {
       listContainer.innerHTML = etas.map((e, i) => {
         const mins = etaMinutes(e.eta);
         const color = mins <= 5 ? 'var(--danger)' : 'var(--fg)';
-        const wheelchairHtml = e.wheelchair ? `<span class="wheelchair-badge" style="transform: scale(0.85); margin-top:2px;">♿ 輪椅</span>` : '';
+        const wheelchairHtml = e.wheelchair ? `<span class="wheelchair-badge" style="margin-top:2px;">♿ 輪椅</span>` : '';
         return `
           <div style="background: var(--bg); border: 1px solid var(--line); padding: 4px 8px; border-radius: 8px; text-align: center; min-width: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <div style="font-size: 10px; color: var(--muted); font-weight: bold;">班次 ${i+1}</div>
@@ -1602,7 +1501,7 @@ async function getKmbEta(route){
       eta: item.eta, 
       destination: pickText(item.dest_tc, item.dest_en, route.destination),
       wheelchair: item.wheelchair === "Y",
-      crowd: item.data_timestamp ? Math.floor(Math.random() * 3) : 0
+      crowd: item.data_timestamp ? Math.floor(Math.random() * 3) : 0 
     }))
     .filter(item => item.eta && isLiveEta(item.eta));
 }
@@ -1615,7 +1514,7 @@ async function getCtbEta(route){
       operator: "CTB", 
       eta: item.eta, 
       destination: pickText(item.dest_tc, item.dest_en, route.destination),
-      wheelchair: true,
+      wheelchair: true, 
       crowd: 0
     }))
     .filter(item => item.eta && isLiveEta(item.eta));
@@ -1623,7 +1522,7 @@ async function getCtbEta(route){
 
 function extractEtaList(obj) {
   if (Array.isArray(obj)) return obj;
-  if (obj && typeof obj === "object") { for (const key of ["eta", "etas", "est", "estimated_time", "time"]) if (Array.isArray(obj[key])) return [obj[key]]; if (obj.timestamp || obj.eta || obj.time || obj.estimated_time) return [obj]; }
+  if (obj && typeof obj === "object") { for (const key of ["eta", "etas", "est", "estimated_time", "time"]) if (Array.isArray(obj[key])) return obj[key]; if (obj.timestamp || obj.eta || obj.time || obj.estimated_time) return [obj]; }
   return [];
 }
 
@@ -1633,7 +1532,7 @@ function normalizeEtaRows(rawRows, route) {
     eta: item.timestamp || item.eta || item.time || item.estimated_time || "", 
     remark: pickText(item.remarks_tc, item.remarks_en, item.remark), 
     destination: route.destination,
-    wheelchair: false,
+    wheelchair: false, 
     crowd: 0
   })).filter(item => item.eta && isLiveEta(item.eta));
   
@@ -1737,11 +1636,11 @@ function getRouteStatusAndReminders(route) {
 
   if (route.fareInfo) {
     if (route.fareInfo.isGmb) {
-      reminders.push(`💰 小巴車費：全程預估 $${route.fareInfo.fare} (🧪 測試中)。`);
+      reminders.push(`💰 小巴車費：全程預估 $${route.fareInfo.fare}。`);
     } else if (route.fareInfo.isSection) {
-      reminders.push(`💰 慳錢提示：此站已適用分段收費！實時車費為 $${route.fareInfo.fare} (原價 $${route.fareInfo.originalFare}) (🧪 測試中)。`);
+      reminders.push(`💰 慳錢提示：此站已適用分段收費！實時車費為 $${route.fareInfo.fare} (原價 $${route.fareInfo.originalFare})。`);
     } else {
-      reminders.push(`💰 車費資訊：全程車費為 $${route.fareInfo.fare} (🧪 測試中)。`);
+      reminders.push(`💰 車費資訊：全程車費為 $${route.fareInfo.fare}。`);
     }
   }
   return { status, reminders };
@@ -1928,11 +1827,11 @@ function renderCards(){
     let fareHtml = "";
     if (route.fareInfo) {
       if (route.fareInfo.isGmb) {
-        fareHtml = `<span class="fare-badge">💰 全程：$${route.fareInfo.fare}<span class="fare-testing-tag">🧪 測試</span></span>`;
+        fareHtml = `<span class="fare-badge">💰 全程：$${route.fareInfo.fare}</span>`;
       } else if (route.fareInfo.isSection) {
-        fareHtml = `<span class="fare-badge" title="原價 $${route.fareInfo.originalFare}">💰 分段：$${route.fareInfo.fare}<span class="fare-testing-tag">🧪 測試</span></span>`;
+        fareHtml = `<span class="fare-badge" title="原價 $${route.fareInfo.originalFare}">💰 分段：$${route.fareInfo.fare}</span>`;
       } else {
-        fareHtml = `<span class="fare-badge">💰 $${route.fareInfo.fare}<span class="fare-testing-tag">🧪 測試</span></span>`;
+        fareHtml = `<span class="fare-badge">💰 $${route.fareInfo.fare}</span>`;
       }
     }
 
@@ -2010,29 +1909,6 @@ function switchTab(tabId) {
   if (tabId === "bus" && lfMap) { setTimeout(() => { lfMap.invalidateSize(); plotSavedStopsOnMap(); plotCamerasOnMap(); }, 200); }
 }
 
-// 📢 點擊特別天氣提示圖擺：切換分頁、展開摺疊、滾動並高亮
-function switchTabAndScrollToSwt() {
-  switchTab('weather');
-  
-  // 確保天氣詳情摺疊面板是展開的
-  const weatherAccordion = $("weather-details-accordion");
-  if (weatherAccordion) weatherAccordion.open = true;
-
-  // 平滑滾動到詳細特別提示區域
-  const target = $("weather-details-full-text");
-  if (target) {
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-      // 增加一個短暫的黃色高亮閃爍效果
-      target.style.transition = "background-color 0.5s";
-      target.style.backgroundColor = "var(--warnbg)";
-      setTimeout(() => {
-        target.style.backgroundColor = "var(--bg)";
-      }, 1500);
-    }, 250);
-  }
-}
-
 function openTutorial() { $("tutorial-modal").classList.remove("hidden"); }
 function closeTutorial() { $("tutorial-modal").classList.add("hidden"); localStorage.setItem("hk_eta_tutorial_seen_v6", "true"); }
 
@@ -2043,161 +1919,81 @@ function weatherText(icon){
   const map = { 50:"陽光充沛",51:"間中有陽光",52:"短暫陽光",53:"有驟雨",54:"有驟雨",60:"多雲",61:"密雲",62:"微雨",63:"有雨",64:"大雨",65:"雷暴",70:"天晴",76:"大致多雲",77:"多雲" };
   return map[icon] || "天氣資料";
 }
-
 function riskInfo(score){
   if (score >= 70) return { text:"大雨", color:"#dc2626" };
   if (score >= 40) return { text:"可能有雨", color:"#d97706" };
-  return { text:"無雨", color:"#15803d" };
+  return { text:"乾燥", color:"#15803d" };
 }
-
 function showRainRisk(minutes, score){
   const info = riskInfo(score);
-  const valEl = $("rain-" + minutes + "-value");
-  const detEl = $("rain-" + minutes + "-detail");
-  if (valEl) { valEl.textContent = `${score}%`; valEl.style.color = info.color; }
-  if (detEl) { detEl.textContent = info.text; }
-  
-  const mini = $("mini-rain-" + minutes); 
-  if (mini) { mini.textContent = `${score}%`; mini.style.color = info.color; }
+  $("rain-" + minutes + "-value").textContent = `${score}%`; $("rain-" + minutes + "-value").style.color = info.color;
+  $("rain-" + minutes + "-detail").textContent = info.text;
+  const mini = $("mini-rain-" + minutes); if (mini) { mini.textContent = `${score}%`; mini.style.color = info.color; }
 }
-
-// 根據天文台官方網格點 CSV 數據，解析最接近觀塘市中心智慧燈柱 (22.32, 114.21) 的降雨預報
-async function getKwunTongGridNowcast() {
-  const csvUrl = "https://data.weather.gov.hk/weatherAPI/hko_data/F3/Gridded_rainfall_nowcast_tc.csv";
-  try {
-    const csvText = await fetchCsvText(csvUrl);
-    const lines = csvText.split(/\r?\n/).map(line => line.split(','));
-    if (lines.length < 2) return null;
-
-    // 清除可能存在的引號並去除空白
-    const headers = lines[0].map(h => h.replace(/["']/g, "").trim());
-    
-    // 動態識別經緯度及預報時間列
-    const latIdx = headers.findIndex(h => /lat|緯|纬/i.test(h));
-    const lngIdx = headers.findIndex(h => /lon|經|经/i.test(h));
-    
-    // 尋找 0.5小時、1.0小時、1.5小時、2.0小時 對應的列索引
-    const p05Idx = headers.findIndex(h => /0\.5|半/i.test(h));
-    const p10Idx = headers.findIndex(h => /1(\.0)?(?![\d\.])|一/i.test(h));
-    const p15Idx = headers.findIndex(h => /1\.5/i.test(h));
-    const p20Idx = headers.findIndex(h => /2(\.0)?(?![\d\.])|二/i.test(h));
-
-    if (latIdx === -1 || lngIdx === -1) return null;
-
-    // 觀塘市中心 多功能智慧燈柱 / 城市氣象監測站 核心坐標 
-    const KT_LAT = 22.32;
-    const KT_LNG = 114.21;
-
-    let closestRow = null;
-    let minDistance = Infinity;
-
-    // 遍歷所有網格點，尋找距離目標測站最近的點
-    for (let i = 1; i < lines.length; i++) {
-      const row = lines[i];
-      if (row.length < headers.length) continue;
-
-      const lat = parseFloat(row[latIdx]?.replace(/["']/g, ""));
-      const lng = parseFloat(row[lngIdx]?.replace(/["']/g, ""));
-      if (isNaN(lat) || isNaN(lng)) continue;
-
-      // 歐氏距離計算
-      const dist = Math.sqrt(Math.pow(lat - KT_LAT, 2) + Math.pow(lng - KT_LNG, 2));
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestRow = row;
-      }
-    }
-
-    if (closestRow) {
-      const nowcast = {
-        lat: parseFloat(closestRow[latIdx]?.replace(/["']/g, "")),
-        lng: parseFloat(closestRow[lngIdx]?.replace(/["']/g, "")),
-        p05: p05Idx !== -1 ? parseFloat(closestRow[p05Idx]?.replace(/["']/g, "")) || 0 : 0,
-        p10: p10Idx !== -1 ? parseFloat(closestRow[p10Idx]?.replace(/["']/g, "")) || 0 : 0,
-        p15: p15Idx !== -1 ? parseFloat(closestRow[p15Idx]?.replace(/["']/g, "")) || 0 : 0,
-        p20: p20Idx !== -1 ? parseFloat(closestRow[p20Idx]?.replace(/["']/g, "")) || 0 : 0,
-      };
-      return nowcast;
-    }
-  } catch (e) {
-    console.error("Failed to parse gridded rainfall nowcast CSV", e);
-  }
-  return null;
+function calculateRainRisk(rainfall, icon, warnings){
+  let base = 10;
+  if (rainfall >= 30) base = 95; else if (rainfall >= 10) base = 80; else if (rainfall >= 2) base = 60; else if (rainfall > 0) base = 35;
+  if ([53, 54, 62, 63].includes(icon)) base = Math.max(base, 45);
+  if ([64, 65].includes(icon)) base = Math.max(base, 78);
+  const text = warnings.join(" ");
+  if (/雷暴|Thunderstorm/i.test(text)) base = Math.max(base, 75);
+  if (/暴雨|Rainstorm/i.test(text)) base = Math.max(base, 85);
+  return { min5: Math.min(100, Math.round(base)), min10: Math.min(100, Math.round(base + (base >= 50 ? 4 : 8))), min15: Math.min(100, Math.round(base + (base >= 50 ? 8 : 14))) };
 }
-
-// 根據官方網格點降雨量 (mm) 精準轉換為真實降雨概率
-function convertRainfallToProbability(rainfall, warningsText = "") {
-  if (rainfall <= 0) {
-    // 官方預報無雨，概率如實降至 0% - 10% 左右
-    return /雷暴|暴雨/i.test(warningsText) ? 15 : 5;
-  }
-  if (rainfall < 0.5) return 25; // 微量降雨
-  if (rainfall < 2.0) return 45; // 輕微降雨
-  if (rainfall < 10.0) return 75; // 中度降雨
-  return 95; // 強降雨
-}
-
-function buildBeforeGoRemark(temp, risk, warnings, ktNowcast){
+function buildBeforeGoRemark(temp, risk, warnings){
   const text = warnings.join(" "); const tips = [];
-  
-  if (ktNowcast) {
-    tips.push(`📊 天文台網格預報 (觀塘市中心智慧燈柱)：未來 30 分鐘預測雨量為 ${ktNowcast.p05.toFixed(1)} mm，60 分鐘預測雨量為 ${ktNowcast.p10.toFixed(1)} mm。`);
-  }
-
-  if (/雷暴|暴雨/.test(text) || risk.min5 >= 70) {
-    tips.push("☔ 觀塘目前正受極端天氣影響！強烈建議您攜帶雨傘，出門最好預留 5 至 10 分鐘，並留意路面交通及積水情況。");
-  } else if (risk.min10 >= 40) {
-    tips.push("⛅ 觀塘天空有雨雲，天氣未算穩定，建議帶備輕便雨具出門。");
-  } else {
-    tips.push("🟢 觀塘落雨風險極低，目前實況無雨，可按原定時間出門。");
-  }
-  return tips.join("<br>");
+  if (/雷暴|暴雨/.test(text) || risk.min5 >= 70) tips.push("建議帶傘，最好預留 5 至 10 分鐘。");
+  else if (risk.min10 >= 40) tips.push("天氣未算穩定，建議帶輕便雨具。");
+  else tips.push("落雨風險較低，可按原定時間出門。");
+  return tips.join(" ");
 }
 
 async function refreshWeather(){
   try {
-    // 獲取官方網格預報數據
-    const ktNowcast = await getKwunTongGridNowcast();
-
+    // 並行獲取數據，優化超時，拒絕卡死
     const [weatherJson, warningJson, fndJson, warningInfoJson, swtJson] = await Promise.all([
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc"),
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc").catch(() => ({})),
-      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/fnd&lang=tc").catch(() => null),
+      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc").catch(() => null),
       safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/warningInfo&lang=tc").catch(() => ({})),
-      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=swt&lang=tc").catch(() => ({}))
+      safeFetch("https://data.weather.gov.hk/weatherAPI/opendata/swt&lang=tc").catch(() => ({}))
     ]);
     
-    // 精準定位觀塘測站溫度與雨量
-    const findKwunTongTemp = rows => rows.find(row => String(row.place || "").includes("觀塘") || String(row.place || "").includes("Kwun Tong")) || rows[0];
-    const findKwunTongRain = rows => rows.find(row => String(row.place || "").includes("觀塘") || String(row.place || "").includes("Kwun Tong")) || { max: 0 };
-    
-    const temp = Number(findKwunTongTemp(weatherJson.temperature?.data || [])?.value ?? 24);
-    const rainfall = Number(findKwunTongRain(weatherJson.rainfall?.data || [])?.max ?? 0);
+    const findKwunTong = rows => rows.find(row => String(row.place || "").includes("觀塘") || String(row.place || "").includes("Kwun Tong")) || rows[0];
+    const temp = Number(findKwunTong(weatherJson.temperature?.data || [])?.value ?? 24);
+    const rainfall = Number(findKwunTong(weatherJson.rainfall?.data || [])?.max ?? 0);
     const icon = Number(weatherJson.icon?.[0] || 50);
     
     const iconsContainer = $("hko-warning-icons");
     iconsContainer.innerHTML = "";
     
     const warnings = [];
-    const warningIconUrls = []; 
-
+    
+    // 💡 重新加入天文台官方警告信號 GIF 圖標的繪製邏輯
     if (warningJson) {
       Object.keys(warningJson).forEach(key => {
         const item = warningJson[key];
         if (item && item.actionCode !== "CANCEL") { 
           warnings.push(item.name);
           
-          let iconUrl = HKO_WARNING_ICONS[key];
-          if (!iconUrl && item.mappedicon) {
-            iconUrl = item.mappedicon.replace(/\\/g, "");
-          }
-
-          if (iconUrl) {
-            warningIconUrls.push(iconUrl);
-
+          // 透過官方 code 對照 HKO_WARNING_ICONS 獲取對應的 GIF 圖標
+          const code = item.code;
+          if (code && HKO_WARNING_ICONS[code]) {
             const img = document.createElement("img");
-            img.src = iconUrl; 
+            img.src = HKO_WARNING_ICONS[code]; 
             img.alt = item.name; 
+            img.title = item.name;
+            img.style.height = "26px"; 
+            img.style.width = "auto"; 
+            img.style.borderRadius = "4px";
+            img.style.boxShadow = "0 1px 3px rgba(0,0,0,0.15)";
+            iconsContainer.appendChild(img);
+          } else if (item.mappedicon) {
+            // 備用方案：如果 code 沒對上，使用 API 返回的 mappedicon
+            const img = document.createElement("img");
+            img.src = item.mappedicon.replace(/\\/g, ""); 
+            img.alt = item.name; 
+            img.title = item.name;
             img.style.height = "26px"; 
             img.style.width = "auto"; 
             img.style.borderRadius = "4px";
@@ -2208,44 +2004,15 @@ async function refreshWeather(){
       });
     }
     
-    // 📢 判斷是否有特別天氣提示，若有則顯示頂部 📢 特別提示圖標
-    const swtTriggerWrapper = $("hko-swt-trigger-wrapper");
-    if (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0) {
-      swtTriggerWrapper.classList.remove("hidden");
-    } else {
-      swtTriggerWrapper.classList.add("hidden");
-    }
-
-    const frontWarningBanner = $("hko-front-warning-text");
+    let shortWarningText = "";
     if (warnings.length > 0) {
-      const iconsHtml = warningIconUrls.map(url => `<img src="${url}" style="height: 24px; width: auto; vertical-align: middle; margin-right: 4px;">`).join("");
-      frontWarningBanner.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%;">
-          <div style="display: flex; gap: 4px; align-items: center;">${iconsHtml}</div>
-          <span style="flex: 1;">⚠️ 警告生效中：${warnings.join("、")} (點擊查看詳情 ❯)</span>
-        </div>
-      `;
-      frontWarningBanner.style.borderLeftColor = "var(--danger)";
-      frontWarningBanner.style.background = "var(--warnbg)";
+      shortWarningText = `⚠️ 警告生效中：${warnings.join("、")} (點擊查看詳情 ❯)`;
     } else if (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0) {
-      frontWarningBanner.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <span style="font-size: 18px;">📢</span>
-          <span style="flex: 1;">特別天氣提示：${escapeHtml(swtJson.swt[0].desc.substring(0, 35))}... (點擊查看詳情 ❯)</span>
-        </div>
-      `;
-      frontWarningBanner.style.borderLeftColor = "var(--accent)";
-      frontWarningBanner.style.background = "var(--soft)";
+      shortWarningText = `📢 特別天氣提示：${swtJson.swt[0].desc.substring(0, 18)}... (點擊查看詳情 ❯)`;
     } else {
-      frontWarningBanner.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <span style="font-size: 18px;">🟢</span>
-          <span style="flex: 1; color: var(--muted);">目前沒有生效的天氣警告 (點擊查看詳情 ❯)</span>
-        </div>
-      `;
-      frontWarningBanner.style.borderLeftColor = "var(--line)";
-      frontWarningBanner.style.background = "var(--soft)";
+      shortWarningText = `🟢 目前沒有生效的天氣警告 (點擊查看詳情 ❯)`;
     }
+    $("hko-front-warning-text").innerHTML = shortWarningText;
 
     let warningAndSwtHtml = "";
     if (swtJson && Array.isArray(swtJson.swt) && swtJson.swt.length > 0) {
@@ -2274,24 +2041,8 @@ async function refreshWeather(){
     $("weather-details-full-text").innerHTML = warningAndSwtHtml;
 
     const desc = weatherText(icon);
-    
-    // 動態計算降雨概率：優先採用官方網格預報
-    let risk = { min5: 10, min10: 12, min15: 15 };
-    const warningsText = warnings.join(" ");
-
-    if (ktNowcast) {
-      risk.min5 = convertRainfallToProbability(ktNowcast.p05, warningsText);
-      risk.min10 = convertRainfallToProbability(ktNowcast.p10, warningsText);
-      risk.min15 = convertRainfallToProbability(ktNowcast.p15, warningsText);
-    } else {
-      // 備用退化邏輯 (若 CSV 讀取失敗)
-      let base = 10;
-      if (rainfall > 0) base = 40;
-      if ([64, 65].includes(icon)) base = 70;
-      risk = { min5: base, min10: Math.min(100, base + 2), min15: Math.min(100, base + 5) };
-    }
-
-    const beforeGoText = buildBeforeGoRemark(temp, risk, warnings, ktNowcast);
+    const risk = calculateRainRisk(rainfall, icon, warnings);
+    const beforeGoText = buildBeforeGoRemark(temp, risk, warnings);
 
     let hkoTimeStr = new Date().toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Hong_Kong" });
     if (weatherJson.updateTime) {
@@ -2300,42 +2051,20 @@ async function refreshWeather(){
     }
     $("weather-updated").textContent = `天文台資料更新時間：${hkoTimeStr}`;
 
-    $("weather-accordion-summary-text").innerHTML = `觀塘市中心智慧燈柱：${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
+    $("weather-accordion-summary-text").innerHTML = `觀塘：${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
     $("kwt-current-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"}・${desc}`;
-    
-    if (ktNowcast) {
-      $("kwt-current-detail").innerHTML = `觀塘過去 1 小時錄得雨量：約 ${rainfall} mm<br><span style="color:var(--accent); font-weight:bold;">📡 官方網格預報：最接近網格點 (${ktNowcast.lat}, ${ktNowcast.lng})</span>`;
-    } else {
-      $("kwt-current-detail").textContent = `觀塘過去 1 小時錄得雨量：約 ${rainfall} mm`;
-    }
-    
-    showRainRisk(5, risk.min5); 
-    showRainRisk(10, risk.min10); 
-    showRainRisk(15, risk.min15);
-    
-    $("before-go-remark").innerHTML = beforeGoText;
+    $("kwt-current-detail").textContent = `觀塘過去 1 小時雨量：約 ${rainfall} mm`;
+    showRainRisk(5, risk.min5); showRainRisk(10, risk.min10); showRainRisk(15, risk.min15);
+    $("before-go-remark").textContent = beforeGoText;
 
     const warningContainer = $("warning-list"); warningContainer.innerHTML = "";
     if (warnings.length > 0) {
         $("warning-box").classList.remove("hidden");
-        warnings.forEach((w, idx) => {
+        warnings.forEach(w => {
             let color = "var(--danger)"; let bg = "var(--bg)";
             if (w.includes("黃") || w.includes("雷暴")) { color = "#d97706"; bg = "#fef3c7"; }
             else if (w.includes("紅") || w.includes("酷熱") || w.includes("八號")) { color = "#dc2626"; bg = "#fee2e2"; }
-            
-            const div = document.createElement("div"); 
-            div.className = "warning-item"; 
-            div.style.borderColor = color; 
-            div.style.color = color; 
-            div.style.backgroundColor = bg;
-            div.style.display = "inline-flex";
-            div.style.alignItems = "center";
-            div.style.gap = "6px";
-
-            const iconUrl = warningIconUrls[idx];
-            const iconHtml = iconUrl ? `<img src="${iconUrl}" style="height: 18px; width: auto; border-radius: 2px;">` : "";
-            
-            div.innerHTML = `${iconHtml}<span>${w}</span>`;
+            const div = document.createElement("div"); div.className = "warning-item"; div.style.borderColor = color; div.style.color = color; div.style.backgroundColor = bg; div.textContent = w;
             warningContainer.appendChild(div);
         });
     } else { $("warning-box").classList.add("hidden"); }
@@ -2354,12 +2083,8 @@ async function refreshWeather(){
     $("sum-weather").textContent = `${Number.isFinite(temp) ? temp + "°C" : "24°C"} | ${desc}`;
   } catch (error) {
     console.error("Weather refresh failed", error);
-    $("weather-accordion-summary-text").textContent = "觀塘市中心：24°C・多雲";
+    $("weather-accordion-summary-text").textContent = "觀塘：24°C・多雲";
     $("status-chip").textContent = "狀態：天氣更新失敗";
-    
-    showRainRisk(5, 10);
-    showRainRisk(10, 12);
-    showRainRisk(15, 15);
   }
 }
 
@@ -2395,13 +2120,12 @@ function updateSummary(){
 function init(){
   loadState(); autoSwitchTime(); renderPlace(); initMap();
 
-  // 專屬 Isis 系統更新提示彈窗
-  if (!localStorage.getItem("Isis_update_acknowledged_2026_07")) {
-    $("Isis-update-modal").classList.remove("hidden");
+  if (!localStorage.getItem("isis_update_acknowledged_2026_07")) {
+    $("isis-update-modal").classList.remove("hidden");
   }
-  $("Isis-modal-close-btn").onclick = () => {
-    $("Isis-update-modal").classList.add("hidden");
-    localStorage.setItem("Isis_update_acknowledged_2026_07", "true");
+  $("isis-modal-close-btn").onclick = () => {
+    $("isis-update-modal").classList.add("hidden");
+    localStorage.setItem("isis_update_acknowledged_2026_07", "true");
   };
 
   $("version-badge-trigger").onclick = openChangelog;
