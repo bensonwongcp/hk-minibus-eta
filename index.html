@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="zh-HK">
 <head>
@@ -9,11 +11,123 @@
   <meta name="apple-mobile-web-app-title" content="ETA Dashboard">
   <meta name="theme-color" content="#0f766e">
   <link class="apple-touch-icon" href="icon-192.png">
-  <title>香港巴士／小巴 ETA＋觀塘天氣與地圖鏡頭</title>
+  <title>香港巴士／小巴 ETA＋觀塘天氣＋港鐵／輕鐵</title>
   
   <!-- 引入 Leaflet.js 地圖庫 -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+// --- NEW RAIL LOGIC ---
+function setRailMessage(text, type=""){ const el = $("rail-message"); if(el){ el.className = `message ${type}`; el.textContent = text; } }
+function setRailStatus(text, ok=true){ const el = $("rail-status"); if(el){ el.textContent = text; el.style.color = ok ? "var(--accent)" : "var(--danger)"; } }
+
+async function renderRailResults(mode, line, station) {
+  setRailMessage("正在查詢即時到站...", "");
+  setRailStatus("連線中", true);
+  $("rail-results").innerHTML = "";
+  try {
+    if (mode === "mtr") {
+      if (!line || !station) throw new Error("MTR 需要 line code 及 station code。");
+      const url = `${MTR_API_BASE}?line=${encodeURIComponent(line)}&sta=${encodeURIComponent(station)}`;
+      const json = await safeFetch(url);
+      if (json.status === 0 || !json.data) throw new Error("MTR API 返回異常或無此車站數據。");
+      const stData = json.data[`${line}-${station}`];
+      if (!stData) throw new Error("無該站到站資訊。");
+      const dirs = [stData.UP, stData.DOWN].filter(Boolean);
+      if (dirs.length === 0) throw new Error("該站目前無列車班次。");
+
+      const cardsHtml = dirs.map(dirList => {
+        if (!dirList || dirList.length === 0) return "";
+        const dirDest = dirList[0].dest; 
+        let etasHtml = `<div class="etas" style="margin-top: 8px;">`;
+        dirList.slice(0, 3).forEach(train => {
+          const timeStr = train.time || "";
+          const min = etaMinutes(timeStr);
+          const minLabel = min <= 0 ? "即將" : (min === Infinity ? "--" : `${min} 分`);
+          etasHtml += `<div class="eta"><div class="eta-min">${minLabel}</div><div class="eta-time">${etaTime(timeStr)}</div><div class="eta-label" style="color:var(--accent);">月台 ${train.plat || ""}</div></div>`;
+        });
+        etasHtml += `</div>`;
+        return `<div class="route-card" style="border-left: 4px solid #2563eb;"><div class="route-head" style="border:none; padding:0; margin:0;"><div class="route-no" style="background:#2563eb;color:#fff;">MTR</div><div class="route-dest" style="margin-left: 8px;">往 ${escapeHtml(dirDest)}</div></div>${etasHtml}</div>`;
+      }).join("");
+      $("rail-results").innerHTML = cardsHtml;
+      setRailMessage("", ""); setRailStatus("實時 MTR", true);
+    } else if (mode === "lrt") {
+      if (!station) throw new Error("Light Rail 需要 station_id (例：020)。");
+      const url = `${LRT_API_BASE}?station_id=${encodeURIComponent(station)}`;
+      const json = await safeFetch(url);
+      if (json.status !== 1 || !json.platform_list) throw new Error("Light Rail API 異常或無該站。");
+
+      let cardsHtml = "";
+      json.platform_list.forEach(p => {
+        const routes = p.route_list || [];
+        if (!routes.length) return;
+        let etasHtml = `<div class="etas" style="margin-top: 8px;">`;
+        routes.slice(0, 3).forEach(r => {
+          const trainLen = r.train_length === 1 ? "1卡" : (r.train_length === 2 ? "2卡" : "");
+          etasHtml += `<div class="eta"><div class="eta-min" style="color: var(--accent); font-size:14px;">${escapeHtml(r.route_no)}</div><div class="eta-min" style="font-size:12px;">${escapeHtml(r.time_en)}</div><div class="eta-time">${escapeHtml(r.dest_en || r.dest_ch)}</div><div class="eta-label">${trainLen}</div></div>`;
+        });
+        etasHtml += `</div>`;
+        cardsHtml += `<div class="route-card" style="border-left: 4px solid #059669;"><div class="route-head" style="border:none; padding:0; margin:0;"><div class="route-no" style="background:#059669;color:#fff;">輕鐵</div><div class="route-dest" style="margin-left: 8px;">月台 ${p.platform_id}</div></div>${etasHtml}</div>`;
+      });
+      if (!cardsHtml) throw new Error("此輕鐵站目前無班次。");
+      $("rail-results").innerHTML = cardsHtml;
+      setRailMessage("", ""); setRailStatus("實時輕鐵", true);
+    }
+  } catch (err) {
+    setRailMessage(err.message, "error"); setRailStatus("連線失敗", false);
+  }
+}
+
+// Override original switchTab with multi-tab support
+function switchTab(tabId) {
+  state.activeTab = tabId;
+  saveState();
+  const btns = ["tab-btn-bus", "tab-btn-rail", "tab-btn-weather"];
+  const tabs = ["tab-bus", "tab-rail", "tab-weather"];
+  btns.forEach(id => { const el = $(id); if(el) el.classList.remove("active"); });
+  tabs.forEach(id => { const el = $(id); if(el) el.classList.add("hidden"); });
+  const activeBtn = $(`tab-btn-${tabId}`); if(activeBtn) activeBtn.classList.add("active");
+  const activeTab = $(`tab-${tabId}`); if(activeTab) activeTab.classList.remove("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const rsBtn = $("rail-search-btn");
+  if(rsBtn) {
+    rsBtn.addEventListener("click", () => {
+      const mode = $("rail-mode").value;
+      const lineCode = $("rail-line-code").value.trim().toUpperCase();
+      const stationCode = $("rail-station-code").value.trim().toUpperCase();
+      state.rail.lastMode = mode; state.rail.lastLineCode = lineCode; state.rail.lastStationCode = stationCode;
+      saveState();
+      renderRailResults(mode, lineCode, stationCode);
+    });
+  }
+  const rmSel = $("rail-mode");
+  if(rmSel) {
+    rmSel.addEventListener("change", (e) => {
+      const isMtr = e.target.value === "mtr";
+      $("rail-line-code").parentElement.style.display = isMtr ? "flex" : "none";
+      $("rail-station-code").placeholder = isMtr ? "MTR: YAT / TIK" : "LRT: 例 020";
+    });
+  }
+
+  // Wire up tabs
+  const tbBus = $("tab-btn-bus"); if(tbBus) tbBus.addEventListener("click", () => switchTab("bus"));
+  const tbRail = $("tab-btn-rail"); if(tbRail) tbRail.addEventListener("click", () => switchTab("rail"));
+  const tbWeather = $("tab-btn-weather"); if(tbWeather) tbWeather.addEventListener("click", () => switchTab("weather"));
+
+  // Load saved state into Rail UI
+  if(state.rail) {
+      if($("rail-mode")) $("rail-mode").value = state.rail.lastMode || "mtr";
+      if($("rail-line-code")) $("rail-line-code").value = state.rail.lastLineCode || "";
+      if($("rail-station-code")) $("rail-station-code").value = state.rail.lastStationCode || "";
+      if(state.rail.lastMode === "lrt" && $("rail-line-code")) $("rail-line-code").parentElement.style.display = "none";
+  }
+
+  // Apply saved tab
+  if(state.activeTab) switchTab(state.activeTab);
+});
+
+</script>
 
   <style>
     * { box-sizing: border-box; }
@@ -220,6 +334,14 @@
     body.dark .wheelchair-badge { background: rgba(96, 165, 250, 0.15); color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); }
 
     @media (max-width: 760px) { body { padding: 8px; } .form-grid { grid-template-columns: 1fr 1fr; } .form-grid .search-button { grid-column: span 2; } .cards { grid-template-columns: 1fr; } }
+  
+    /* Rail CSS */
+    .op-mtr { background: #2563eb !important; color: #fff !important; }
+    .op-lrt { background: #059669 !important; color: #fff !important; }
+    .rail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .rail-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 900; border: 1px solid var(--line); background: var(--soft); color: var(--fg); }
+    .rail-station-helpers { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    
   </style>
 </head>
 <body>
@@ -229,9 +351,9 @@
   <header class="topbar" style="align-items: flex-start;">
     <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 4px;">
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <h1 style="margin: 0;">香港巴士／小巴 ETA＋觀塘天氣與地圖鏡頭</h1>
+        <h1 style="margin: 0;">香港巴士／小巴 ETA＋觀塘天氣＋港鐵／輕鐵</h1>
         <!-- 版本號徽章 -->
-        <span id="version-badge-trigger" class="version-badge" title="點擊查看更新日誌">v2026.7.16BETA</span>
+        <span id="version-badge-trigger" class="version-badge" title="點擊查看更新日誌">v2026.7.18 RAIL</span>
         <!-- 官方警告信號 GIF 圖標直接在標題旁並排顯示 -->
         <div id="hko-warning-icons" style="display: flex; gap: 6px; align-items: center;"></div>
       </div>
@@ -305,7 +427,7 @@
   <div id="changelog-modal" class="modal-overlay hidden">
     <div class="modal-content" style="max-width: 480px;">
       <h2 style="margin-bottom: 12px; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 8px;">
-        🚀 系統升級報告 (v2026.7.16BETA)
+        🚀 系統升級報告 (v2026.7.18 RAIL)
       </h2>
       <p class="note" style="margin-bottom: 16px; font-weight: bold;">我們進行了全方位的核心重構，以下是本次升級的重大亮點：</p>
       
@@ -396,6 +518,7 @@
 
   <div class="ios-segmented-control">
     <button id="tab-btn-bus" class="seg-btn active">巴士路線</button>
+    <button id="tab-btn-rail" class="seg-btn">港鐵 / 輕鐵</button>
     <button id="tab-btn-weather" class="seg-btn">天氣詳情</button>
   </div>
 
@@ -464,6 +587,46 @@
     </section>
   </div>
 
+  
+  <!-- TAB RAIL -->
+  <div id="tab-rail" class="tab-content hidden">
+    <section class="panel">
+      <div class="status-row" style="margin-bottom:12px;">
+        <h2>港鐵 / 輕鐵到站</h2>
+        <div id="rail-status" class="note" style="color:var(--accent);">準備就緒</div>
+      </div>
+      <details class="custom-accordion" open>
+        <summary>
+          <span style="font-size: 15px;">🚇 搜尋港鐵 / 輕鐵到站</span>
+          <span style="color:var(--muted); font-size: 12px;">展開 ▾</span>
+        </summary>
+        <div class="custom-accordion-content">
+          <div class="rail-grid" style="margin-top:8px;">
+            <label>模式
+              <select id="rail-mode">
+                <option value="mtr">MTR 港鐵</option>
+                <option value="lrt">Light Rail 輕鐵</option>
+              </select>
+            </label>
+            <label>線路代碼
+              <input id="rail-line-code" type="text" placeholder="例如：TKL / KTL">
+            </label>
+            <label>車站代碼/ID
+              <input id="rail-station-code" type="text" placeholder="MTR: YAT；LRT: 020">
+            </label>
+            <button id="rail-search-btn" class="btn search-button" type="button">查詢</button>
+          </div>
+          <div class="rail-station-helpers">
+            <span class="rail-chip">MTR：用 line + station code</span>
+            <span class="rail-chip">Light Rail：用 station_id</span>
+          </div>
+          <div id="rail-message" class="message"></div>
+          <div id="rail-results" class="results" style="max-height: 460px;"></div>
+        </div>
+      </details>
+    </section>
+  </div>
+
   <!-- TAB 2: WEATHER DETAILS -->
   <div id="tab-weather" class="tab-content hidden">
     <section class="panel">
@@ -495,7 +658,9 @@
 </main>
 
 <script>
-const STORAGE_KEY = "hk_eta_dashboard_v11";
+const STORAGE_KEY = "hk_eta_dashboard_v12";
+const MTR_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
+const LRT_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/lrt/getSchedule";
 const KMB_CACHE_KEY = "kmb_stops_cache_v2"; const GMB_STOP_CACHE_KEY = "gmb_stops_cache_v2";
 const KMB_CACHE_AGE = 7 * 24 * 60 * 60 * 1000; const GMB_CACHE_AGE = 3 * 24 * 60 * 60 * 1000;
 
@@ -575,6 +740,8 @@ const state = {
   autoRefresh: true, 
   settings: { ...defaultSettings },
   currentSearchResults: [] 
+,
+  rail: { lastMode: "mtr", lastLineCode: "", lastStationCode: "" }
 };
 let etasTimer = null; let weatherTimer = null;
 
@@ -2216,6 +2383,118 @@ function init(){
   }, 1000);
 }
 init();
+
+// --- NEW RAIL LOGIC ---
+function setRailMessage(text, type=""){ const el = $("rail-message"); if(el){ el.className = `message ${type}`; el.textContent = text; } }
+function setRailStatus(text, ok=true){ const el = $("rail-status"); if(el){ el.textContent = text; el.style.color = ok ? "var(--accent)" : "var(--danger)"; } }
+
+async function renderRailResults(mode, line, station) {
+  setRailMessage("正在查詢即時到站...", "");
+  setRailStatus("連線中", true);
+  $("rail-results").innerHTML = "";
+  try {
+    if (mode === "mtr") {
+      if (!line || !station) throw new Error("MTR 需要 line code 及 station code。");
+      const url = `${MTR_API_BASE}?line=${encodeURIComponent(line)}&sta=${encodeURIComponent(station)}`;
+      const json = await safeFetch(url);
+      if (json.status === 0 || !json.data) throw new Error("MTR API 返回異常或無此車站數據。");
+      const stData = json.data[`${line}-${station}`];
+      if (!stData) throw new Error("無該站到站資訊。");
+      const dirs = [stData.UP, stData.DOWN].filter(Boolean);
+      if (dirs.length === 0) throw new Error("該站目前無列車班次。");
+
+      const cardsHtml = dirs.map(dirList => {
+        if (!dirList || dirList.length === 0) return "";
+        const dirDest = dirList[0].dest; 
+        let etasHtml = `<div class="etas" style="margin-top: 8px;">`;
+        dirList.slice(0, 3).forEach(train => {
+          const timeStr = train.time || "";
+          const min = etaMinutes(timeStr);
+          const minLabel = min <= 0 ? "即將" : (min === Infinity ? "--" : `${min} 分`);
+          etasHtml += `<div class="eta"><div class="eta-min">${minLabel}</div><div class="eta-time">${etaTime(timeStr)}</div><div class="eta-label" style="color:var(--accent);">月台 ${train.plat || ""}</div></div>`;
+        });
+        etasHtml += `</div>`;
+        return `<div class="route-card" style="border-left: 4px solid #2563eb;"><div class="route-head" style="border:none; padding:0; margin:0;"><div class="route-no" style="background:#2563eb;color:#fff;">MTR</div><div class="route-dest" style="margin-left: 8px;">往 ${escapeHtml(dirDest)}</div></div>${etasHtml}</div>`;
+      }).join("");
+      $("rail-results").innerHTML = cardsHtml;
+      setRailMessage("", ""); setRailStatus("實時 MTR", true);
+    } else if (mode === "lrt") {
+      if (!station) throw new Error("Light Rail 需要 station_id (例：020)。");
+      const url = `${LRT_API_BASE}?station_id=${encodeURIComponent(station)}`;
+      const json = await safeFetch(url);
+      if (json.status !== 1 || !json.platform_list) throw new Error("Light Rail API 異常或無該站。");
+
+      let cardsHtml = "";
+      json.platform_list.forEach(p => {
+        const routes = p.route_list || [];
+        if (!routes.length) return;
+        let etasHtml = `<div class="etas" style="margin-top: 8px;">`;
+        routes.slice(0, 3).forEach(r => {
+          const trainLen = r.train_length === 1 ? "1卡" : (r.train_length === 2 ? "2卡" : "");
+          etasHtml += `<div class="eta"><div class="eta-min" style="color: var(--accent); font-size:14px;">${escapeHtml(r.route_no)}</div><div class="eta-min" style="font-size:12px;">${escapeHtml(r.time_en)}</div><div class="eta-time">${escapeHtml(r.dest_en || r.dest_ch)}</div><div class="eta-label">${trainLen}</div></div>`;
+        });
+        etasHtml += `</div>`;
+        cardsHtml += `<div class="route-card" style="border-left: 4px solid #059669;"><div class="route-head" style="border:none; padding:0; margin:0;"><div class="route-no" style="background:#059669;color:#fff;">輕鐵</div><div class="route-dest" style="margin-left: 8px;">月台 ${p.platform_id}</div></div>${etasHtml}</div>`;
+      });
+      if (!cardsHtml) throw new Error("此輕鐵站目前無班次。");
+      $("rail-results").innerHTML = cardsHtml;
+      setRailMessage("", ""); setRailStatus("實時輕鐵", true);
+    }
+  } catch (err) {
+    setRailMessage(err.message, "error"); setRailStatus("連線失敗", false);
+  }
+}
+
+// Override original switchTab with multi-tab support
+function switchTab(tabId) {
+  state.activeTab = tabId;
+  saveState();
+  const btns = ["tab-btn-bus", "tab-btn-rail", "tab-btn-weather"];
+  const tabs = ["tab-bus", "tab-rail", "tab-weather"];
+  btns.forEach(id => { const el = $(id); if(el) el.classList.remove("active"); });
+  tabs.forEach(id => { const el = $(id); if(el) el.classList.add("hidden"); });
+  const activeBtn = $(`tab-btn-${tabId}`); if(activeBtn) activeBtn.classList.add("active");
+  const activeTab = $(`tab-${tabId}`); if(activeTab) activeTab.classList.remove("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const rsBtn = $("rail-search-btn");
+  if(rsBtn) {
+    rsBtn.addEventListener("click", () => {
+      const mode = $("rail-mode").value;
+      const lineCode = $("rail-line-code").value.trim().toUpperCase();
+      const stationCode = $("rail-station-code").value.trim().toUpperCase();
+      state.rail.lastMode = mode; state.rail.lastLineCode = lineCode; state.rail.lastStationCode = stationCode;
+      saveState();
+      renderRailResults(mode, lineCode, stationCode);
+    });
+  }
+  const rmSel = $("rail-mode");
+  if(rmSel) {
+    rmSel.addEventListener("change", (e) => {
+      const isMtr = e.target.value === "mtr";
+      $("rail-line-code").parentElement.style.display = isMtr ? "flex" : "none";
+      $("rail-station-code").placeholder = isMtr ? "MTR: YAT / TIK" : "LRT: 例 020";
+    });
+  }
+
+  // Wire up tabs
+  const tbBus = $("tab-btn-bus"); if(tbBus) tbBus.addEventListener("click", () => switchTab("bus"));
+  const tbRail = $("tab-btn-rail"); if(tbRail) tbRail.addEventListener("click", () => switchTab("rail"));
+  const tbWeather = $("tab-btn-weather"); if(tbWeather) tbWeather.addEventListener("click", () => switchTab("weather"));
+
+  // Load saved state into Rail UI
+  if(state.rail) {
+      if($("rail-mode")) $("rail-mode").value = state.rail.lastMode || "mtr";
+      if($("rail-line-code")) $("rail-line-code").value = state.rail.lastLineCode || "";
+      if($("rail-station-code")) $("rail-station-code").value = state.rail.lastStationCode || "";
+      if(state.rail.lastMode === "lrt" && $("rail-line-code")) $("rail-line-code").parentElement.style.display = "none";
+  }
+
+  // Apply saved tab
+  if(state.activeTab) switchTab(state.activeTab);
+});
+
 </script>
 </body>
 </html>
